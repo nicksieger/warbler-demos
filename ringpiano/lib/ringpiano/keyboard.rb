@@ -16,15 +16,27 @@ module RingPiano
         KeyEvent::VK_F => 65
       }
 
+    KEYS = {67 => 'g', 68 => 'g#', 69 => 'a', 70 => 'b-',
+      71 => 'b', 72 => 'c', 73 => 'c#', 74 => 'd',
+      75 => 'e-', 76 => 'e', 77 => 'f', 78 => 'f#', 79 => 'g'}
+
     def initialize(server = nil)
       @server = server || Server.new
       @adjust = 0
       @note_player = java.util.concurrent.Executors.newCachedThreadPool
       java.awt.EventQueue.invokeAndWait do
         @frame = javax.swing.JFrame.new "Ring Piano"
-        @frame.set_size 400, 100
+        @frame.set_size 430, 150
         @frame.layout = java.awt.FlowLayout.new
-        @frame.add javax.swing.JLabel.new("Type using A-G keys. Use SHIFT for sharps and CTRL for flats.")
+        KEYS.each do |value, note|
+          button = javax.swing.JButton.new note
+          button.add_action_listener do |e|
+            LOG.debug "button pressed: #{note}"
+            @note_player.submit { @server.note_on(value, 99) }
+          end
+          @frame.add button
+        end
+        @frame.add javax.swing.JLabel.new("Or type using A-G keys. Use SHIFT for sharps and CTRL for flats.")
         @frame.add_key_listener(self)
         @frame.add_window_listener(self)
         @frame.default_close_operation = @frame.class::EXIT_ON_CLOSE
