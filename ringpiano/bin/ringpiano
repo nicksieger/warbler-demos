@@ -1,12 +1,35 @@
 #!/usr/bin/env ruby
 
 require 'ringpiano'
-require 'ringpiano/soundboard'
-require 'ringpiano/keyboard'
-
 server = RingPiano::Server.new
-if defined?(JRUBY_VERSION)
-  RingPiano::Soundboard.new(server)
-  RingPiano::Keyboard.new(server)
+join = true
+
+case ARGV.first
+when 'soundboard'
+  if defined?(JRUBY_VERSION)
+    require 'ringpiano/soundboard'
+    RingPiano::Soundboard.new(server)
+  end
+when 'keyboard'
+  if defined?(JRUBY_VERSION)
+    require 'ringpiano/keyboard'
+    RingPiano::Keyboard.new(server)
+  end
+when 'console'
+  join = false
+  ARGV.clear
+  require 'irb'
+  Object.send(:define_method, :server) { server }
+  IRB.start(__FILE__)
+when 'server'
+  nil
+else
+  if defined?(JRUBY_VERSION)
+    require 'ringpiano/soundboard'
+    require 'ringpiano/keyboard'
+    RingPiano::Soundboard.new(server)
+    RingPiano::Keyboard.new(server)
+  end
 end
-DRb.thread.join
+
+DRb.thread.join if join
