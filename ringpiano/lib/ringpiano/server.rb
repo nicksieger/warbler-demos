@@ -6,16 +6,28 @@ module RingPiano
       load_piano_space
     end
 
+    def name
+      @name ||= begin
+                  user = (require 'etc'; Etc.getlogin)
+                  host = Socket.gethostname rescue "Unknown"
+                  "#{user}@#{host}"
+                end
+    end
+
     def note_on(note, volume)
+      LOG.debug "send note_on: #{note}"
       @piano.write(['ringpiano', 'note_on', note, volume])
     end
 
     def note_off(note)
+      LOG.debug "send note_off: #{note}"
       @piano.write(['ringpiano', 'note_off', note, nil])
     end
 
     def next_command
-      @piano.take(['ringpiano', nil, nil, nil])[1..3]
+      @piano.take(['ringpiano', nil, nil, nil])[1..3].tap do |cmd|
+        LOG.debug "receive #{cmd.inspect}"
+      end
     end
 
     def register(*args)
@@ -33,10 +45,13 @@ module RingPiano
 
     private
     def start_ring_server
+      ts = Rinda::TupleSpace.new
+      @ring_server = Rinda::RingServer.new(ts)
+      LOG.info "Started Ring server with primary: #{ts}"
       Thread.new do
-        @ring_server = Rinda::RingServer.new(Rinda::TupleSpace.new)
-        LOG.info "Started Ring server: #@ring_server"
-        DRb.thread.join
+        ts.notify('write', [:name, nil, nil, nil]).each do |event,tuple|
+          LOG.info "Registered service: #{tuple[1]} #{tuple[3]}"
+        end
       end
     end
 
@@ -48,7 +63,7 @@ module RingPiano
           Rinda::RingFinger.finger.lookup_ring_any
           Rinda::RingFinger.primary
         end
-        LOG.info "Using #{@ring_finger}"
+        LOG.info "Using primary #{@ring_finger}"
       rescue Exception => e
         LOG.debug e
         raise if @ring_server
@@ -63,10 +78,9 @@ module RingPiano
       unless piano_tuple
         ts = Rinda::TupleSpace.new
         register(:RingPiano, ts, 'Ring Piano')
-        LOG.info "Registered Ring Piano TupleSpace: #{ts}"
         piano_tuple = ring_finger.read([:name, :RingPiano, nil, nil])
       end
-      LOG.info "Using #{piano_tuple[2]}"
+      LOG.info "Using ring piano #{piano_tuple[2]}"
       @piano = Rinda::TupleSpaceProxy.new(piano_tuple[2])
     end
   end

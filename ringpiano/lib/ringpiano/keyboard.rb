@@ -30,7 +30,13 @@ module RingPiano
         @frame.default_close_operation = @frame.class::EXIT_ON_CLOSE
         @frame.visible = true
       end
+      register
       @notes = {}
+    end
+
+    def register
+      @server.register(:Keyboard, DRbObject.new(self), @server.name)
+      LOG.info "Registered Keyboard: #{@server.name}"
     end
 
     def key_to_note(event)
@@ -40,6 +46,7 @@ module RingPiano
     end
 
     def keyPressed(event)
+      LOG.debug "key pressed: #{event}"
       return if @notes.include?(event.key_code)
       if note = key_to_note(event)
         @notes[event.key_code] = note
@@ -48,6 +55,7 @@ module RingPiano
     end
 
     def keyReleased(event)
+      LOG.debug "key released: #{event}"
       note = @notes.delete(event.key_code)
       @note_player.submit { @server.note_off(note) } if note
     end

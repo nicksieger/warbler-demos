@@ -6,9 +6,6 @@ module RingPiano
 
     def initialize(server = nil)
       @server = server || Server.new
-      user = (require 'etc'; Etc.getlogin)
-      host = Socket.gethostname rescue "Unknown"
-      @name = "#{user}@#{host}"
       synth = javax.sound.midi.MidiSystem.synthesizer
       synth.open
       @channel = synth.channels[0]
@@ -17,15 +14,17 @@ module RingPiano
     end
 
     def register
-      @server.register(:Soundboard, DRbObject.new(self), @name)
-      LOG.info "Registered Soundboard: #{self}"
+      @server.register(:Soundboard, DRbObject.new(self), @server.name)
+      LOG.info "Registered Soundboard: #{@server.name}"
     end
 
     def note_on(note, volume)
+      LOG.debug "note on: #{note}"
       @channel.note_on note, volume
     end
 
     def note_off(note)
+      LOG.debug "note off: #{note}"
       @channel.note_off note
     end
 
