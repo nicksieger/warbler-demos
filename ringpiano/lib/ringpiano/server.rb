@@ -48,12 +48,6 @@ module RingPiano
       ts = Rinda::TupleSpace.new
       @ring_server = Rinda::RingServer.new(ts)
       LOG.info "Started Ring server with primary: #{ts}"
-      Thread.new do
-        ts.notify('write', [:name, nil, nil, nil]).each do |event,tuple|
-          LOG.info "Registered service: #{tuple[1]} #{tuple[3]}"
-        end
-        DRb.thread.join
-      end
     end
 
     def ring_finger
@@ -63,6 +57,16 @@ module RingPiano
         @ring_finger = Timeout::timeout(5) do
           Rinda::RingFinger.finger.lookup_ring_any
           Rinda::RingFinger.primary
+        end
+        Thread.new do
+          @ring_finger.notify(nil, [:name, nil, nil, nil]).each do |event, tuple|
+            if event == 'write'
+              LOG.info "Registered service: #{tuple[1]} #{tuple[3]}"
+            else
+              LOG.info "Unregistered service: #{tuple[1]} #{tuple[3]}"
+            end
+          end
+          DRb.thread.join
         end
         LOG.info "Using primary #{@ring_finger}"
       rescue Exception => e

@@ -15,7 +15,6 @@ module RingPiano
 
     def register
       @server.register(:Soundboard, DRbObject.new(self), @server.name)
-      LOG.info "Registered Soundboard: #{@server.name}"
     end
 
     def note_on(note, volume)

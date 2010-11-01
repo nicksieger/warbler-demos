@@ -48,7 +48,6 @@ module RingPiano
 
     def register
       @server.register(:Keyboard, DRbObject.new(self), @server.name)
-      LOG.info "Registered Keyboard: #{@server.name}"
     end
 
     def key_to_note(event)
