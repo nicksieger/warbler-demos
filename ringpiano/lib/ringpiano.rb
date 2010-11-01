@@ -145,6 +145,7 @@ module RingPiano
       @frame.add_window_listener(self)
       @frame.default_close_operation = @frame.class::EXIT_ON_CLOSE
       @frame.visible = true
+      @notes = {}
     end
 
     def key_to_note(code)
@@ -155,20 +156,22 @@ module RingPiano
       case event.key_code
       when KeyEvent::VK_SHIFT
         @adjust = 1
-      when KeyEvent::VK_CONTROL, KeyEvent::VK_ALT, KeyEvent::VK_META
+      when KeyEvent::VK_CONTROL, KeyEvent::VK_ALT
         @adjust = -1
       else
+        return if @notes.include?(event.key_code)
         note = key_to_note(event.key_code)
+        @notes[event.key_code] = note
         @server.note_on(note, 99) if note
       end
     end
 
     def keyReleased(event)
       case event.key_code
-      when KeyEvent::VK_SHIFT, KeyEvent::VK_CONTROL, KeyEvent::VK_ALT, KeyEvent::VK_META
+      when KeyEvent::VK_SHIFT, KeyEvent::VK_CONTROL, KeyEvent::VK_ALT
         @adjust = 0
       else
-        note = key_to_note(event.key_code)
+        note = @notes.delete(event.key_code) || key_to_note(event.key_code)
         @server.note_off(note) if note
       end
     end
