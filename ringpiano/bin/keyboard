@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'ringpiano'
+require 'ringpiano/keyboard'
+
+RingPiano::Keyboard.new
+DRb.thread.join

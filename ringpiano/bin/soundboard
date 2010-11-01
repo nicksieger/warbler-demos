@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'ringpiano'
+require 'ringpiano/soundboard'
+
+RingPiano::Soundboard.new
+DRb.thread.join

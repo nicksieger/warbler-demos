@@ -1,0 +1,6 @@
+#!/usr/bin/env ruby
+
+require 'ringpiano'
+
+RingPiano::Server.new
+DRb.thread.join

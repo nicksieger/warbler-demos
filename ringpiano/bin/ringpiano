@@ -1,0 +1,12 @@
+#!/usr/bin/env ruby
+
+require 'ringpiano'
+require 'ringpiano/soundboard'
+require 'ringpiano/keyboard'
+
+server = RingPiano::Server.new
+if defined?(JRUBY_VERSION)
+  RingPiano::Soundboard.new(server)
+  RingPiano::Keyboard.new(server)
+end
+DRb.thread.join
