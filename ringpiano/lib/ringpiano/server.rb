@@ -1,6 +1,6 @@
 module RingPiano
   class Server
-    attr_reader :space
+    attr_reader :piano
 
     def initialize
       load_piano_space
@@ -52,6 +52,7 @@ module RingPiano
         ts.notify('write', [:name, nil, nil, nil]).each do |event,tuple|
           LOG.info "Registered service: #{tuple[1]} #{tuple[3]}"
         end
+        DRb.thread.join
       end
     end
 
