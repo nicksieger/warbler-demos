@@ -3,7 +3,7 @@
 Gem::Specification.new do |s|
   s.name              = 'ringpiano'
   s.version           = '1.0.0'
-  s.date              = '2010-10-27'
+  s.date              = '2010-11-02'
 
   s.rubyforge_project = %q{caldersphere}
 
@@ -21,6 +21,17 @@ Gem::Specification.new do |s|
 
   # = MANIFEST =
   s.files = %w[
+    LICENSE
+    README.md
+    Rakefile
+    bin/ringpiano
+    lib/ringpiano.rb
+    lib/ringpiano/keyboard.rb
+    lib/ringpiano/participantlist.rb
+    lib/ringpiano/server.rb
+    lib/ringpiano/soundboard.rb
+    lib/ringpiano/swing.rb
+    ringpiano.gemspec
   ]
   # = MANIFEST =
 
