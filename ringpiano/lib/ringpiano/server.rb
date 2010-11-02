@@ -3,7 +3,9 @@ module RingPiano
     attr_reader :piano
 
     def initialize
+      @services = []
       load_piano_space
+      at_exit { close }
     end
 
     def name
@@ -31,7 +33,6 @@ module RingPiano
     end
 
     def register(*args)
-      @services ||= []
       service = [:name, *args]
       ring_finger.write(service, Rinda::SimpleRenewer.new)
       @services << service

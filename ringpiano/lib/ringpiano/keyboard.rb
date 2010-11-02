@@ -1,9 +1,9 @@
 require 'java'
+require 'ringpiano/swing'
 
 module RingPiano
-  java_import java.awt.event.KeyEvent
-
   class Keyboard
+    include Application
     include java.awt.event.KeyListener, java.awt.event.WindowListener
 
     NOTES = {
@@ -21,6 +21,7 @@ module RingPiano
       75 => 'e-', 76 => 'e', 77 => 'f', 78 => 'f#', 79 => 'g'}
 
     def initialize(server = nil)
+      super()
       @server = server || Server.new
       @adjust = 0
       @note_player = java.util.concurrent.Executors.newCachedThreadPool
@@ -34,6 +35,7 @@ module RingPiano
             LOG.debug "button pressed: #{note}"
             @note_player.submit { @server.note_on(value, 99) }
           end
+          button.add_key_listener(self)
           @frame.add button
         end
         @frame.add javax.swing.JLabel.new("Or type using A-G keys. Use SHIFT for sharps and CTRL for flats.")
@@ -71,9 +73,13 @@ module RingPiano
       @note_player.submit { @server.note_off(note) } if note
     end
 
-    def windowClosing(*)
+    def close
       javax.sound.midi.MidiSystem.synthesizer.close
       @server.close
+    end
+
+    def windowClosing(*)
+      close
     end
 
     def method_missing(*)
