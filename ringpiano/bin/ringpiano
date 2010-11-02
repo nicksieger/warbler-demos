@@ -22,11 +22,16 @@ when 'console'
   Object.send(:define_method, :server) { server }
   IRB.start(__FILE__)
 when 'server'
-  nil
+  if defined?(JRUBY_VERSION)
+    require 'ringpiano/participantlist'
+    RingPiano::ParticipantList.new(server)
+  end
 else
   if defined?(JRUBY_VERSION)
     require 'ringpiano/soundboard'
     require 'ringpiano/keyboard'
+    require 'ringpiano/participantlist'
+    RingPiano::ParticipantList.new(server)
     RingPiano::Soundboard.new(server)
     RingPiano::Keyboard.new(server)
   end

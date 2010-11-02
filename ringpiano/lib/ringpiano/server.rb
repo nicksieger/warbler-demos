@@ -1,9 +1,10 @@
 module RingPiano
   class Server
-    attr_reader :piano
+    attr_reader :piano, :listeners
 
     def initialize
       @services = []
+      @listeners = []
       load_piano_space
       at_exit { close }
     end
@@ -12,7 +13,7 @@ module RingPiano
       @name ||= begin
                   user = (require 'etc'; Etc.getlogin)
                   host = Socket.gethostname rescue "Unknown"
-                  "#{user}@#{host}"
+                  "#{user}@#{host}:#{DRb.uri[/:([^:]+)$/, 1]}"
                 end
     end
 
@@ -42,6 +43,11 @@ module RingPiano
       @services.each do |service|
         ring_finger.take(service)
       end
+      @services = []
+    end
+
+    def primary
+      ring_finger
     end
 
     private
@@ -61,6 +67,7 @@ module RingPiano
         end
         Thread.new do
           @ring_finger.notify(nil, [:name, nil, nil, nil]).each do |event, tuple|
+            @listeners.each {|l| l.notify(event, tuple) rescue LOG.debug($!) }
             if event == 'write'
               LOG.info "Registered service: #{tuple[1]} #{tuple[3]}"
             else
