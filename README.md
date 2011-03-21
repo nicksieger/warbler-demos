@@ -49,3 +49,8 @@ actually work on the Rails app...
 This is just a simple Ruby script demonstrating the `Warbler::Jar` API
 for creating archives from Ruby. Run with `jruby jar.rb` after
 installing Warbler.
+
+### Littleapp
+
+This is another Warbler jar example that creates a simple rack
+application and serves it with Trinidad as an executable ruby jar.

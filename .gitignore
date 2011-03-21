@@ -1,1 +1,6 @@
 pkg
+/littleapp/littleapp.jar
+/rails-3.0.1/rails-3.0.1.jar
+/ringpiano/ringpiano.jar
+/ringpiano/warbler-1.3.0.beta1.jar
+/littleapp/app/tmp/restart.txt
